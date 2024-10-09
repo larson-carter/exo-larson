@@ -56,7 +56,7 @@ args = parser.parse_args()
 print_yellow_exo()
 
 if args.use_advanced_strategy:
-    strategy = AdvancedPartitioningStrategy(latency_weight=args.latency_weight, throughput_weight=args.throughput_weight)
+    strategy = AdvancedPartitioningStrategy(latency_weight=0.4, memory_weight=0.3, flops_weight=0.3)
 else:
     strategy = RingMemoryWeightedPartitioningStrategy()
 

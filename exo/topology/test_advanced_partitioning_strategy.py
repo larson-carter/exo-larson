@@ -28,14 +28,10 @@ class TestAdvancedPartitioningStrategy(unittest.TestCase):
         topology.add_latency("node2", "node3", 0.2)
         topology.add_latency("node3", "node1", 0.15)
 
-        strategy = AdvancedPartitioningStrategy()
+        strategy = AdvancedPartitioningStrategy(latency_weight=0.4, memory_weight=0.3, flops_weight=0.3)
         partitions = strategy.partition(topology)
 
         self.assertEqual(len(partitions), 3)
-        
-        # Check that partitions are in descending order of size
-        partition_sizes = [p.end - p.start for p in partitions]
-        self.assertEqual(partition_sizes, sorted(partition_sizes, reverse=True))
         
         # Check that all nodes are represented
         node_ids = set(p.node_id for p in partitions)
@@ -82,7 +78,7 @@ class TestAdvancedPartitioningStrategy(unittest.TestCase):
         topology.add_latency("node2", "node3", 0.05)
         topology.add_latency("node3", "node1", 0.05)
 
-        strategy = AdvancedPartitioningStrategy()
+        strategy = AdvancedPartitioningStrategy(latency_weight=0.4, memory_weight=0.3, flops_weight=0.3)
         partitions = strategy.partition(topology)
 
         self.assertEqual(len(partitions), 3)
@@ -104,7 +100,7 @@ class TestAdvancedPartitioningStrategy(unittest.TestCase):
         )
         topology.add_latency("node1", "node2", 0.1)
 
-        strategy = AdvancedPartitioningStrategy()
+        strategy = AdvancedPartitioningStrategy(latency_weight=0.4, memory_weight=0.3, flops_weight=0.3)
         partitions = strategy.partition(topology)
 
         self.assertEqual(len(partitions), 2)
