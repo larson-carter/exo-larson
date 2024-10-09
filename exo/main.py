@@ -12,6 +12,7 @@ from exo.networking.udp.udp_discovery import UDPDiscovery
 from exo.networking.tailscale.tailscale_discovery import TailscaleDiscovery
 from exo.networking.grpc.grpc_peer_handle import GRPCPeerHandle
 from exo.topology.ring_memory_weighted_partitioning_strategy import RingMemoryWeightedPartitioningStrategy
+from exo.topology.advanced_partitioning_strategy import AdvancedPartitioningStrategy
 from exo.api import ChatGPTAPI
 from exo.download.shard_download import ShardDownloader, RepoProgressEvent
 from exo.download.hf.hf_shard_download import HFShardDownloader
@@ -47,9 +48,17 @@ parser.add_argument("--run-model", type=str, help="Specify a model to run direct
 parser.add_argument("--prompt", type=str, help="Prompt for the model when using --run-model", default="Who are you?")
 parser.add_argument("--tailscale-api-key", type=str, default=None, help="Tailscale API key")
 parser.add_argument("--tailnet-name", type=str, default=None, help="Tailnet name")
+parser.add_argument("--use-advanced-strategy", action="store_true", help="Use the AdvancedPartitioningStrategy")
+parser.add_argument("--latency-weight", type=float, default=0.3,help="Latency weight for AdvancedPartitioningStrategy (default: 0.3)")
+parser.add_argument("--throughput-weight", type=float, default=0.7,help="Throughput weight for AdvancedPartitioningStrategy (default: 0.7)")
 args = parser.parse_args()
 
 print_yellow_exo()
+
+if args.use_advanced_strategy:
+    strategy = AdvancedPartitioningStrategy(latency_weight=args.latency_weight, throughput_weight=args.throughput_weight)
+else:
+    strategy = RingMemoryWeightedPartitioningStrategy()
 
 system_info = get_system_info()
 print(f"Detected system: {system_info}")
@@ -84,7 +93,7 @@ node = StandardNode(
   None,
   inference_engine,
   discovery,
-  partitioning_strategy=RingMemoryWeightedPartitioningStrategy(),
+  partitioning_strategy=strategy,
   max_generate_tokens=args.max_generate_tokens,
   topology_viz=topology_viz
 )

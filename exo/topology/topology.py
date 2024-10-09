@@ -1,5 +1,5 @@
 from .device_capabilities import DeviceCapabilities
-from typing import Dict, Set, Optional
+from typing import Dict, Set, Optional, Tuple
 
 
 class Topology:
@@ -7,6 +7,14 @@ class Topology:
     self.nodes: Dict[str, DeviceCapabilities] = {}  # Maps node IDs to DeviceCapabilities
     self.peer_graph: Dict[str, Set[str]] = {}  # Adjacency list representing the graph
     self.active_node_id: Optional[str] = None
+    self.latencies: Dict[Tuple[str, str], float] = {}
+
+  def add_latency(self, node1_id: str, node2_id: str, latency: float):
+    self.latencies[(node1_id, node2_id)] = latency
+    self.latencies[(node2_id, node1_id)] = latency
+
+  def get_latency(self, node1_id: str, node2_id: str) -> float:
+    return self.latencies.get((node1_id, node2_id), float('inf'))
 
   def update_node(self, node_id: str, device_capabilities: DeviceCapabilities):
     self.nodes[node_id] = device_capabilities
