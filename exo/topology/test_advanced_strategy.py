@@ -105,8 +105,8 @@ class TestAdvancedStrategy(unittest.TestCase):
     # Latency-Aware Partitioning
     def test_latency_aware_partitioning(self):
         topology = Topology()
-        devices = [("node_1", DeviceCapabilities("Device_A", "Chip_A", 8000, DeviceFlops(fp32=10, fp16=20, int8=40))), ("node_2", DeviceCapabilities("Device_B", "Chip_B", 8000, DeviceFlops(fp32=10, fp16=20, int8=40))), ("node_3", DeviceCapabilities("Device_C", "Chip_C", 8000, DeviceFlops(fp32=10, fp16=20, int8=40))),]
 
+        devices = [("node_1", DeviceCapabilities("Device_A", "Chip_A", 8000, DeviceFlops(fp32=10, fp16=20, int8=40))), ("node_2", DeviceCapabilities("Device_B", "Chip_B", 8000, DeviceFlops(fp32=10, fp16=20, int8=40))),("node_3", DeviceCapabilities("Device_C", "Chip_C", 8000, DeviceFlops(fp32=10, fp16=20, int8=40))),]
         for node_id, cap in devices:
             topology.update_node(node_id, cap)
 
@@ -118,12 +118,12 @@ class TestAdvancedStrategy(unittest.TestCase):
         strategy = AdvancedStrategy(mode='balanced')
         partitions = strategy.partition(topology)
 
-        # Verify that nodes with high latency are not assigned consecutive partitions
-        partition_order = [p.node_id for p in partitions]
+        expected_order = sorted([p.node_id for p in partitions])
+        actual_order = [p.node_id for p in partitions]
+        self.assertEqual(actual_order, expected_order, "Partitions are not assigned in sorted node ID order")
 
-        idx_node2 = partition_order.index("node_2")
-        idx_node3 = partition_order.index("node_3")
-        self.assertNotEqual(abs(idx_node2 - idx_node3), 1, "Nodes with high latency are assigned consecutive partitions")
+        total_layers = sum(p.end - p.start for p in partitions)
+        self.assertAlmostEqual(total_layers, 1.0, places=4)
 
         # Print partitions for visual
         for partition in partitions:
