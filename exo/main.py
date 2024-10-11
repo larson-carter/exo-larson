@@ -49,11 +49,13 @@ parser.add_argument("--prompt", type=str, help="Prompt for the model when using 
 parser.add_argument("--tailscale-api-key", type=str, default=None, help="Tailscale API key")
 parser.add_argument("--tailnet-name", type=str, default=None, help="Tailnet name")
 parser.add_argument("--strategy", type=str, default="ring_memory_weighted", choices=["ring_memory_weighted", "advanced"], help="Partitioning strategy to use.")
+parser.add_argument("--mode", type=str, default="balanced", choices=["latency", "throughput", "balanced"], help="Optimization mode for AdvancedStrategy.")
+parser.add_argument("--model_memory", type=float, default=None, help="Total model memory requirement in MB.")
 
 args = parser.parse_args()
 
 if args.strategy == "advanced":
-  strategy = AdvancedStrategy()
+  strategy = AdvancedStrategy(mode=args.mode)
 else:
   strategy = RingMemoryWeightedPartitioningStrategy()
 
