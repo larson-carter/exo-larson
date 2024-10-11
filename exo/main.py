@@ -11,6 +11,7 @@ from exo.networking.grpc.grpc_server import GRPCServer
 from exo.networking.udp.udp_discovery import UDPDiscovery
 from exo.networking.tailscale.tailscale_discovery import TailscaleDiscovery
 from exo.networking.grpc.grpc_peer_handle import GRPCPeerHandle
+from exo.topology.advanced_strategy import AdvancedStrategy
 from exo.topology.ring_memory_weighted_partitioning_strategy import RingMemoryWeightedPartitioningStrategy
 from exo.api import ChatGPTAPI
 from exo.download.shard_download import ShardDownloader, RepoProgressEvent
@@ -47,7 +48,14 @@ parser.add_argument("--run-model", type=str, help="Specify a model to run direct
 parser.add_argument("--prompt", type=str, help="Prompt for the model when using --run-model", default="Who are you?")
 parser.add_argument("--tailscale-api-key", type=str, default=None, help="Tailscale API key")
 parser.add_argument("--tailnet-name", type=str, default=None, help="Tailnet name")
+parser.add_argument("--strategy", type=str, default="ring_memory_weighted", choices=["ring_memory_weighted", "advanced"], help="Partitioning strategy to use.")
+
 args = parser.parse_args()
+
+if args.strategy == "advanced":
+  strategy = AdvancedStrategy()
+else:
+  strategy = RingMemoryWeightedPartitioningStrategy()
 
 print_yellow_exo()
 
@@ -84,7 +92,7 @@ node = StandardNode(
   None,
   inference_engine,
   discovery,
-  partitioning_strategy=RingMemoryWeightedPartitioningStrategy(),
+  partitioning_strategy=strategy,
   max_generate_tokens=args.max_generate_tokens,
   topology_viz=topology_viz
 )
